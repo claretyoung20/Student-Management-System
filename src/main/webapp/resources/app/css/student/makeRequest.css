@@ -1,0 +1,16 @@
+.request{
+	width: 50%;
+	margin: auto;
+	
+}
+.request h2{
+	font-weight:bold;
+	font-family: sans-serif;
+}
+
+hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 0;
+    border-top: 1px solid #5764a5;;
+}

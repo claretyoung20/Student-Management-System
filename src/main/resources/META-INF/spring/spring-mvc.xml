@@ -127,5 +127,9 @@
     <bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
         <property name="trimTokens" value="false" />
     </bean>
+    
+    <!-- FileUpload bean configuration -->
+    <bean id = "multipartResolver"
+      class = "org.springframework.web.multipart.commons.CommonsMultipartResolver" />
 
 </beans>

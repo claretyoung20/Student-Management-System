@@ -1,17 +1,22 @@
 package ssms.app.cms;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.util.List;
+import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.rmi.CORBA.UtilDelegate;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import ssms.domain.model.Department;
 import ssms.domain.model.Request;
@@ -30,6 +36,8 @@ import ssms.domain.service.cms.student.StudentService;
 
 @Controller
 public class StudentController {
+	
+	private  final URL UPLOAD_DIRECTORY = this.getClass().getClassLoader().getResource("/app/images/");
 	
 	@Autowired
 	StudentService studentService;
@@ -93,7 +101,7 @@ public class StudentController {
 		Date date = new Date(new java.util.Date().getTime());
 		String today = date.toString();
 		model.addAttribute("date",today);
-		
+	
 		return "student/makeRequest";
 	}
 
@@ -132,14 +140,23 @@ public class StudentController {
 	}
 
 	@RequestMapping(value="/view", method=RequestMethod.POST)
-	public String addRequest(@ModelAttribute("request") Request request, HttpSession session, Model model) {
+	public String addRequest(@RequestParam MultipartFile file, @ModelAttribute("request") Request request, HttpSession session, Model model, @Validated BindingResult result) throws IOException{
+		
+		
 		
 		if(SessionValidate(session,model) != null) {
 			return "student/studentLogin";
 		}
 		
+		if(result.hasErrors()) {
+			System.out.println("****************Error***************" + result.getObjectName());
+			return "/view";
+		}
+		
 		List<Request> getAllRequest = requestService.findByStudentId(getStudentId(session));
 		model.addAttribute("request", getAllRequest);
+		
+
 		
 		Request getRequestData = new Request();
 		getRequestData.setRequestTitle(request.getRequestTitle());
@@ -160,9 +177,37 @@ public class StudentController {
 		getRequestData.setRequestContent(request.getRequestContent());
 		getRequestData.setRequestStatus(0);
 		getRequestData.setRequestSolution(null);
-		getRequestData.setAttachmentName(null);
 		
-	
+		String imageNameAndExt = null;
+		
+
+		
+		System.out.println("========file full name ========= "+file.getOriginalFilename() + " ===========Content type ============= " + file.getOriginalFilename());
+		try{
+                //get the bytes
+	            byte[] bytes = file.getBytes();
+	            
+	            //generate name
+	             imageNameAndExt = fileExt(file.getOriginalFilename());
+
+	             //save to resources directory
+	            Path path = Paths.get(UPLOAD_DIRECTORY + imageNameAndExt);
+	            Files.write(path, bytes);
+	            
+	          
+		        
+		        
+	            } catch (IOException e) {
+	                	e.printStackTrace();
+           }
+           
+           
+		//ClassLoader classLoader = getClass().getClassLoader().getSystemClassLoader();
+		
+		System.out.println("========classloader========= "+UPLOAD_DIRECTORY);
+		 
+		 getRequestData.setAttachmentName(null);
+		
 		requestService.saveRequest(getRequestData);
 		
 		return "redirect:/view";
@@ -231,6 +276,39 @@ public class StudentController {
 		return studentSession.getId();
 		
 	}
+	
+	
+	//check file type and get extension
+	public String fileExt(String fullName){
+		String ext = null;
+		
+	    ext = FilenameUtils.getExtension(fullName);
+		
+		String imageName = UUID.randomUUID().toString();
+       
+        imageName = imageName +"."+ext;
+		return imageName;
+	}
+	/*http://localhost:8080/ssms/resources/app/css/bootstrap.min.css*/
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

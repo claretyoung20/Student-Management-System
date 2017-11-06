@@ -3,7 +3,7 @@
     <div class="request">
        
         <h1 style="text-align: center;">Create New Request</h1>
-        <form:form  action="view" modelAttribute="departments" method="post">
+        <form:form  action="view?${_csrf.parameterName}=${_csrf.token}" method="post" enctype="multipart/form-data">
         
 	        <div class="form-group row">
 				  <label for="example-text-input" class="col-sm-2 col-form-label">Report To</label>
@@ -54,17 +54,22 @@
 			    <textarea class="form-control"  name="requestContent" id="example-content-input" required></textarea>
 			  </div>
 			</div>
-			
+		
 			<div class="form-group row">
 				  <label for="example-filet-input" class="col-sm-2 col-form-label">Attachment (If any)</label>
 				  <div class="col-sm-10">
-				    <input class="form-control" type="file" name="attachmentName" id="example-file-input">
+				    <input class="form-control" type="file" name="file" id="example-file-input"> 
+				    <%--   <form:input cssClass="form-control" type="file" path="file" /> --%>
 				  </div>
 			</div>
+			
+			
 			
 			<div style="text-align: center;">
 				<button class="btn btn-primary">Send</button>
 
    			</div>
+   			
+   			<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
     	</form:form>
     </div>

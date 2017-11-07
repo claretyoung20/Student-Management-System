@@ -15,4 +15,6 @@ public interface RequestRepository extends JpaRepository<Request, Long>{
 	List<Request> findByStudentId(String studentId);
 	
 	List<Request> findByDepartmentIdAndStudentId(int departmentId, String studentId);
+	
+	Request findByAttachmentNameIgnoreCaseContaining(String attachmentName);
 }

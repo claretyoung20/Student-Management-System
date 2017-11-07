@@ -20,4 +20,6 @@ public interface RequestService {
 	
 	void updateRequest(Request request);
 	
+    Request findByAttachmentName(String fileName); 
+  
 }

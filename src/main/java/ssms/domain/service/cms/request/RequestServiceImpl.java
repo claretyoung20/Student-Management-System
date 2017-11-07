@@ -55,6 +55,12 @@ public class RequestServiceImpl implements RequestService {
 	public List<Request> findByDepartmentIdAndStudentId(int dId, String sId) {
 		return requestRepository.findByDepartmentIdAndStudentId(dId,sId);
 	}
+
+	@Override
+	public Request findByAttachmentName(String fileName) {
+		
+		return requestRepository.findByAttachmentNameIgnoreCaseContaining(fileName);
+	}
 	
 
 }

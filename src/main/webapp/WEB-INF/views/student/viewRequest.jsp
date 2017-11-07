@@ -89,7 +89,16 @@
 	    	<td>
 	    		<th>Attachment</th>
 	    	</td>
-	    	<td><button class="btn btn-primary">Download</button></td>
+	    	
+	    	<c:choose>
+	    		<c:when test="${request.attachmentName == null}">
+	    			<td>N/A</td>
+	    		</c:when>
+	    		<c:otherwise>
+	    			<td><a href="download/${request.attachmentName}" target="_blank"><button class="btn btn-primary">Download</button></a></td>
+	    		</c:otherwise>
+	    	</c:choose>
+	    	
 	    </tr>
 	    
 	      <tr>

@@ -17,9 +17,9 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
-                        <li class="active"><a href="${pageContext.request.contextPath}/"><span class="glyphicon glyphicon-home"></span> Home<span class="sr-only">(current)</span></a></li>
-                        <li><a href="${pageContext.request.contextPath}/request">Make Request</a></li>
-                        <li><a href="${pageContext.request.contextPath}/view">Search Request</a></li>
+                        <li class="${param.home}"><a href="${pageContext.request.contextPath}/"><span class="glyphicon glyphicon-home"></span> Home<span class="sr-only">(current)</span></a></li>
+                        <li class="${param.makeRequest}"><a href="${pageContext.request.contextPath}/request">Make Request</a></li>
+                        <li class="${param.viewRequest}"><a href="${pageContext.request.contextPath}/view">View Request </a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="#"><span class="glyphicon glyphicon-user"></span>${student.studentName}</a></li>

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,34 +52,45 @@ public class StudentController {
 	// Home page
 	@RequestMapping(value = "/")
 	public String home(HttpSession session, Model model) {
+		// check if the user is logged in
 		if (SessionValidate(session, model) != null) {
 			return "student/studentLogin";
 		}
-
+		// return home.jsp
 		return "student/home";
 	}
 
 	// Login
+	/**
+	 * @param session
+	 * @return
+	 */
 	@GetMapping(value = "/studentLogin")
 	public String login(HttpSession session) {
 
+		// remove the session attribute so that use will not be able to access any page
+		// without logging in
 		session.removeAttribute("student");
 		return "student/studentLogin";
 	}
 
+	/**
+	 * @param student
+	 * @param bindingResult
+	 * @param session
+	 * @return
+	 */
 	@PostMapping(value = "/studentLogin")
-	public String getLogin(@ModelAttribute("student") Student student, HttpSession session) {
+	public String getLogin(@ModelAttribute("student") @Valid Student student, BindingResult bindingResult,
+			HttpSession session) {
 
-		// make sure the user entered a value
-		if (student.getId().isEmpty()) {
-			return "student/studentLogin";
-		} else if (student.getPassword().isEmpty()) {
+		// make sure user enter user id and password
+		if (bindingResult.hasErrors()) {
 			return "student/studentLogin";
 		}
 
 		// check if there is a student with the information
-		Student loginStudent = null;
-		loginStudent = studentService.findByIdAndPassword(student.getId(), student.getPassword());
+		Student loginStudent = studentService.findByIdAndPassword(student.getId(), student.getPassword());
 		if (loginStudent == null) {
 			return "student/studentLogin";
 		}
@@ -87,16 +98,24 @@ public class StudentController {
 		// Save to session
 		session.setAttribute("student", student);
 
+		// return home page
 		return "redirect:/";
 	}
 
 	// make request
+	/**
+	 * @param session
+	 * @param model
+	 * @return
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/request")
 	public String makeRequest(HttpSession session, Model model) throws IOException {
 
 		if (SessionValidate(session, model) != null) {
 			return "student/studentLogin";
 		}
+
 		// date
 		Date date = new Date(new java.util.Date().getTime());
 		String today = date.toString();
@@ -108,6 +127,7 @@ public class StudentController {
 	/**
 	 * @param session
 	 * @param model
+	 * @return
 	 */
 	private String SessionValidate(HttpSession session, Model model) {
 		Student studentSession = (Student) session.getAttribute("student");
@@ -129,9 +149,8 @@ public class StudentController {
 	@RequestMapping(value = "/view", method = RequestMethod.GET)
 	public String allRequest(@ModelAttribute("request") Request request, HttpSession session, Model model) {
 
-		if (SessionValidate(session, model) != null) {
+		if (SessionValidate(session, model) != null)
 			return "student/studentLogin";
-		}
 
 		List<Request> getAllRequest = requestService.findByStudentId(getStudentId(session));
 		model.addAttribute("request", getAllRequest);
@@ -139,18 +158,15 @@ public class StudentController {
 		return "student/searchRequest";
 	}
 
-	@RequestMapping(value = "/view", method = RequestMethod.POST)
-	public String addRequest(@RequestParam MultipartFile file, @ModelAttribute("request") Request request,
-			HttpSession session, Model model, @Validated BindingResult result) throws IOException {
+	@RequestMapping(value = "/request", method = RequestMethod.POST)
+	public String addRequest(@ModelAttribute("request") @Valid Request request, BindingResult result,
+			@RequestParam MultipartFile file, HttpSession session, Model model) throws IOException {
 
-		if (SessionValidate(session, model) != null) {
+		if (SessionValidate(session, model) != null)
 			return "student/studentLogin";
-		}
 
-		if (result.hasErrors()) {
-			System.out.println("****************Error***************" + result.getObjectName());
-			return "/view";
-		}
+		if (result.hasErrors())
+			return "student/makeRequest";
 
 		List<Request> getAllRequest = requestService.findByStudentId(getStudentId(session));
 		model.addAttribute("request", getAllRequest);
@@ -160,10 +176,9 @@ public class StudentController {
 		getRequestData.setDateCreated(request.getDateCreated());
 		getRequestData.setDataClose(null);
 		getRequestData.setStaff(null);
-
 		Student student1 = (Student) session.getAttribute("student");
-		getRequestData.setStudent(student1);
 
+		getRequestData.setStudent(student1);
 		Department department1 = new Department();
 		department1.setId(request.getId().intValue());
 
@@ -175,60 +190,58 @@ public class StudentController {
 		getRequestData.setRequestStatus(0);
 		getRequestData.setRequestSolution(null);
 
-		String imageNameAndExt = null;
-
-		String pathRT = session.getServletContext().getRealPath("/resources/app/studentFiles");
-
-		try {
-			// get the bytes
-			byte[] bytes = file.getBytes();
-
-			// generate name
-			imageNameAndExt = fileExt(file.getOriginalFilename());
-
-			// save to resources directory
-			Path path = Paths.get(pathRT + "\\" + imageNameAndExt);
-			Files.write(path, bytes);
-
-		} catch (IOException e) {
-			e.printStackTrace();
+		// check if there is attachment
+		if (file.isEmpty()) {
+			// add null to attachmentName
+			getRequestData.setAttachmentName(null);
+		} else {
+			String imageNameAndExt = null;
+			String fullPath = session.getServletContext().getRealPath("/resources/app/studentFiles");
+			try {
+				// get the bytes
+				byte[] bytes = file.getBytes();
+				// generate name
+				imageNameAndExt = fileExt(file.getOriginalFilename());
+				// save to resources directory
+				Path path = Paths.get(fullPath + "\\" + imageNameAndExt);
+				Files.write(path, bytes);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			getRequestData.setAttachmentName(imageNameAndExt);
 		}
-		getRequestData.setAttachmentName(imageNameAndExt);
-
+		// save to dataBase
 		requestService.saveRequest(getRequestData);
-
 		return "redirect:/view";
 	}
 
 	// download file controller
-	@RequestMapping(value="/view/download/{fileName}")
-	public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName, HttpSession session) throws Exception {
-		
-		
-		//get the file full name from database
-			Request request = requestService.findByAttachmentName(fileName);
-			
-			//full path 
-			String pathRT = session.getServletContext().getRealPath("/resources/app/studentFiles");
-			
-			String FILE_PATH = pathRT +"\\"+request.getAttachmentName();
-			
-			System.out.println("*************************FILE_PATH*******************"+FILE_PATH);
-			Path path = Paths.get(FILE_PATH);
-		      byte[] data = Files.readAllBytes(path);
-		      ByteArrayResource resource = new ByteArrayResource(data);
+	@RequestMapping(value = "/view/download/{fileName}")
+	public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName, HttpSession session)
+			throws Exception {
 
-		      return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + path.getFileName().toString())
-		            .contentType(MediaType.APPLICATION_PDF).contentLength(data.length) .body(resource);
-		
+		// get the file full name from database
+		Request request = requestService.findByAttachmentName(fileName);
+
+		// full path
+		String pathRT = session.getServletContext().getRealPath("/resources/app/studentFiles");
+		String FILE_PATH = pathRT + "\\" + request.getAttachmentName();
+
+		Path path = Paths.get(FILE_PATH);
+		byte[] data = Files.readAllBytes(path);
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + path.getFileName().toString())
+				.contentType(MediaType.ALL).contentLength(data.length).body(resource);
+
 	}
 
 	@RequestMapping(value = "/view/{id}")
 	public String viewRequest(HttpSession session, Model model, @PathVariable Long id) {
 
-		if (SessionValidate(session, model) != null) {
+		if (SessionValidate(session, model) != null)
 			return "student/studentLogin";
-		}
 
 		Request requestDetail = requestService.getOne(id);
 		model.addAttribute("request", requestDetail);
@@ -236,13 +249,12 @@ public class StudentController {
 		return "student/viewRequest";
 	}
 
-	@RequestMapping(value = "/views", method = RequestMethod.POST)
+	@RequestMapping(value = "/view-by-title", method = RequestMethod.GET)
 	public String viewRequestWithTitle(HttpSession session, Model model, @RequestParam String requestTitle) {
 
-		if (SessionValidate(session, model) != null) {
+		if (SessionValidate(session, model) != null)
 			return "student/studentLogin";
-		}
-
+	
 		List<Request> requestDetail = requestService
 				.findByStudentIdAndRequestTitleIgnoreCaseContaining(getStudentId(session), requestTitle);
 		model.addAttribute("request", requestDetail);
@@ -250,12 +262,12 @@ public class StudentController {
 		return "student/searchRequest";
 	}
 
-	@RequestMapping(value = "/viewss", method = RequestMethod.POST)
+	@RequestMapping(value = "/view-by-department", method = RequestMethod.GET)
 	public String viewRequestWithDept(HttpSession session, Model model, @RequestParam int searchR) {
 
-		if (SessionValidate(session, model) != null) {
+		if (SessionValidate(session, model) != null)
 			return "student/studentLogin";
-		}
+		
 		if (searchR == 0) {
 			List<Request> requestDetail = requestService.findByStudentId(getStudentId(session));
 			model.addAttribute("request", requestDetail);
@@ -272,11 +284,6 @@ public class StudentController {
 		model.addAttribute("request", requestDetail);
 
 		return "student/searchRequest";
-	}
-
-	@GetMapping(value = "/student/all")
-	public @ResponseBody List<Student> allStudent() {
-		return studentService.findAll();
 	}
 
 	public String getStudentId(HttpSession session) {

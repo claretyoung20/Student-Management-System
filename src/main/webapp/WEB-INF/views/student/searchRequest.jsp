@@ -1,4 +1,7 @@
-<%@ include file="navbar.jsp" %>
+<%-- <%@ include file="navbar.jsp" %> --%>
+<jsp:include page="navbar.jsp">
+	<jsp:param name="viewRequest" value="active"/>
+</jsp:include>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/app/css/student/makeRequest.css" type="text/css">
 
 
@@ -7,7 +10,7 @@
 		 <h3 style="text-align: center;">Student ID: ${student.id}</h3>
 		 <h3 style="text-align: center;">Student Name: ${student.studentName}</h3>
 	 	
-	 	<form:form action="viewss" method="post">
+	 	<form:form action="view-by-department" method="get">
 		 	 <div class="form-group row">
 				  <label for="example-text-input" class="col-sm-3 col-form-label">Select Department</label>
 				  <div class="col-sm-9">
@@ -39,7 +42,7 @@
 			  </div>
 	   </form:form>
 	   
-		 <form:form action="views" method="post">
+		 <form:form action="view-by-title" method="get">
 		 	 <div class="form-group row">
 				  <label for="example-text-input" class="col-sm-3 col-form-label">Or enter request title:</label>
 				   <div class="col-sm-7">
@@ -48,8 +51,7 @@
 				   <div class="col-sm-2">
 				  		<button class="btn btn-primary" type="submit">View</button>
 				  </div>
-			</div>
-			
+			</div>		
 	   </form:form>
 	 
 	 	<hr/>
@@ -92,6 +94,8 @@
 			      
 			      <td>${request.department.departmentName}</td>
 			      <td><a href="${pageContext.request.contextPath}/view/${request.id}">View</a></td>
+			      
+			      <td><span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span></td>
 		    </tr>
 		     </c:forEach>
 		    

@@ -1,9 +1,11 @@
-<%@ include file="navbar.jsp" %>
+<jsp:include page="navbar.jsp">
+	<jsp:param name="makeRequest" value="active"/>
+</jsp:include>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/app/css/student/makeRequest.css" type="text/css">
     <div class="request">
        
         <h1 style="text-align: center;">Create New Request</h1>
-        <form:form  action="view?${_csrf.parameterName}=${_csrf.token}" method="post" enctype="multipart/form-data">
+        <form:form  action="?${_csrf.parameterName}=${_csrf.token}" method="post" enctype="multipart/form-data" commandName="request">
         
 	        <div class="form-group row">
 				  <label for="example-text-input" class="col-sm-2 col-form-label">Report To</label>
@@ -14,6 +16,7 @@
 						    	<option value="${departments.id}">${departments.departmentName}</option>
 						    </c:forEach>
 					    </select>
+					    <form:errors path="id" cssClass="error" element="div" />
 				  </div>
 			</div>
 	        
@@ -36,7 +39,8 @@
 			<div class="form-group row">
 			  <label for="example-date-input" class="col-sm-2 col-form-label">Date</label>
 			  <div class="col-sm-10">
-			    <input class="form-control" type="date" name="dateCreated" value="${date}" id="example-date-input" readonly />
+			    <input class="form-control" type="date" name="dateCreated" value="${date}" id="example-date-input"  />
+			    <form:errors path="dateCreated" cssClass="error" element="div" />
 			  </div>
 			</div>
 			
@@ -44,6 +48,7 @@
 				  <label for="example-title-input" class="col-sm-2 col-form-label">Request Title</label>
 				  <div class="col-sm-10">
 				    <input class="form-control" type="text" name="requestTitle" id="example-title-input" required />
+				    <form:errors path="requestTitle" cssClass="error" element="div" />
 				  </div>
 			</div>
 			
@@ -52,6 +57,7 @@
 			  <label for="example-content-input" class="col-sm-2 col-form-label">Request Content</label>
 			  <div class="col-sm-10">
 			    <textarea class="form-control"  name="requestContent" id="example-content-input" required></textarea>
+			     <form:errors path="requestContent" cssClass="error" element="div" />
 			  </div>
 			</div>
 		

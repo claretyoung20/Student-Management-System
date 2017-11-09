@@ -10,45 +10,51 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "request")
 public class Request implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Min(1)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@Column(name = "request_title")
 	private String requestTitle;
-	
+
 	@Column(name = "date_created")
 	private Date dateCreated;
-	
+
 	@Column(name = "data_close")
 	private Date dataClose;
-	
+
 	@ManyToOne
-	private Staff staff;	
+	private Staff staff;
 
 	@ManyToOne
 	private Student student;
-	
+
 	@ManyToOne
 	private Department department;
-	
+
 	@Column(name = "request_content")
 	private String requestContent;
-	
+
 	@Column(name = "request_status")
 	private int requestStatus;
-	
+
 	@Column(name = "request_solution")
 	private String requestSolution;
-	
+
 	@Column(name = "attachment_name")
 	private String attachmentName;
 
@@ -60,6 +66,9 @@ public class Request implements Serializable {
 		this.id = id;
 	}
 
+	@NotEmpty
+	@NotNull
+	@NotBlank
 	public String getRequestTitle() {
 		return requestTitle;
 	}
@@ -108,6 +117,9 @@ public class Request implements Serializable {
 		this.department = department;
 	}
 
+	@NotEmpty
+	@NotNull
+	@NotBlank
 	public String getRequestContent() {
 		return requestContent;
 	}
@@ -140,8 +152,4 @@ public class Request implements Serializable {
 		this.attachmentName = attachmentName;
 	}
 
-	
-
-	
-	
 }

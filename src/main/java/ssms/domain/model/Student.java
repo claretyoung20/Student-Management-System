@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+
 @Entity
 @Table(name = "student")
 public class Student implements Serializable {
@@ -18,7 +19,6 @@ public class Student implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@NotEmpty
 	@Column(name = "id")
 	private String id;
 	
@@ -26,7 +26,7 @@ public class Student implements Serializable {
 	private String studentName;
 	
 	
-	@NotEmpty
+	
 	@Column(name = "password")
 	private String password;
 	
@@ -35,6 +35,7 @@ public class Student implements Serializable {
 	private Department department;
 
 
+	@NotEmpty(message="Student ID cannot be empty")
 	public String getId() {
 		return id;
 	}
@@ -54,7 +55,7 @@ public class Student implements Serializable {
 		this.studentName = studentName;
 	}
 
-
+	
 	public Department getDepartment() {
 		return department;
 	}
@@ -65,6 +66,7 @@ public class Student implements Serializable {
 	}
 
 
+	@NotEmpty(message="Password cannot be empty")
 	public String getPassword() {
 		return password;
 	}
